@@ -1,0 +1,68 @@
+import random
+
+class Monkey:
+    def __init__(self, name, position):
+        self.name = name
+        self.position = position
+        self.steps_taken = 0
+
+    def move(self, goal_position, other_monkey_position):
+        # The monkey moves towards the banana unless the other monkey is blocking its path.
+        if self.position < goal_position:
+            # Move right
+            if self.position + 1 != other_monkey_position:  # Avoid collision with the other monkey
+                self.position += 1
+                self.steps_taken += 1
+        elif self.position > goal_position:
+            # Move left
+            if self.position - 1 != other_monkey_position:  # Avoid collision with the other monkey
+                self.position -= 1
+                self.steps_taken += 1
+
+    def get_position(self):
+        return self.position
+
+    def get_steps(self):
+        return self.steps_taken
+
+class MonkeyBananaEnvironment:
+    def __init__(self, grid_size, banana_position, monkey1_position, monkey2_position):
+        self.grid_size = grid_size
+        self.banana_position = banana_position
+        self.monkey1 = Monkey('M1', monkey1_position)
+        self.monkey2 = Monkey('M2', monkey2_position)
+
+    def display(self):
+        # Display the current state of the grid
+        grid = ['_'] * self.grid_size
+        grid[self.banana_position] = 'B'  # Banana position
+        grid[self.monkey1.get_position()] = 'M1'  # Monkey 1 position
+        grid[self.monkey2.get_position()] = 'M2'  # Monkey 2 position
+        print("Grid: ", grid)
+        print(f"Monkey 1 at position: {self.monkey1.get_position()} - Steps taken: {self.monkey1.get_steps()}")
+        print(f"Monkey 2 at position: {self.monkey2.get_position()} - Steps taken: {self.monkey2.get_steps()}\n")
+
+    def play(self):
+        # Simulate the environment until one of the monkeys reaches the banana
+        while self.monkey1.get_position() != self.banana_position and self.monkey2.get_position() != self.banana_position:
+            self.monkey1.move(self.banana_position, self.monkey2.get_position())
+            self.monkey2.move(self.banana_position, self.monkey1.get_position())
+
+            # Display the current state of the grid
+            self.display()
+
+        # Determine who won
+        if self.monkey1.get_position() == self.banana_position:
+            print("Monkey 1 reached the banana first!")
+        elif self.monkey2.get_position() == self.banana_position:
+            print("Monkey 2 reached the banana first!")
+
+# Set up the environment
+grid_size = 10  # The grid will have 10 positions
+banana_position = 8  # Bananas are at position 8
+monkey1_position = 0  # Monkey 1 starts at position 0
+monkey2_position = 5  # Monkey 2 starts at position 5
+
+# Create the environment and start the competition
+env = MonkeyBananaEnvironment(grid_size, banana_position, monkey1_position, monkey2_position)
+env.play()
