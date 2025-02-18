@@ -1,0 +1,97 @@
+from collections import deque
+
+# Define the 8-puzzle problem (3x3 grid)
+initial_state = (
+    (1, 2, 3),
+    (4, 5, 6),
+    (7, 8, 0)  # 0 represents the empty space
+)
+
+goal_state = (
+    (1, 2, 3),
+    (4, 5, 6),
+    (7, 0, 8)
+)
+
+# Directions to move the empty space: up, down, left, right
+moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+# Helper function to convert state to string for easier comparison
+def state_to_str(state):
+    return ''.join(str(cell) for row in state for cell in row)
+
+# Function to check if the current state is the goal state
+def is_goal_state(state):
+    return state == goal_state
+
+# Function to find the position of the empty space (0)
+def find_empty_space(state):
+    for i, row in enumerate(state):
+        if 0 in row:
+            return i, row.index(0)
+    return -1, -1
+
+# Function to generate the possible next states by moving the empty space
+def generate_neighbors(state):
+    neighbors = []
+    empty_i, empty_j = find_empty_space(state)
+    
+    for move in moves:
+        new_i, new_j = empty_i + move[0], empty_j + move[1]
+        
+        # Check if the move is within bounds
+        if 0 <= new_i < 3 and 0 <= new_j < 3:
+            # Create a new state by swapping the empty space with the new position
+            new_state = list(list(row) for row in state)  # Make a mutable copy
+            new_state[empty_i][empty_j], new_state[new_i][new_j] = new_state[new_i][new_j], new_state[empty_i][empty_j]
+            neighbors.append(tuple(tuple(row) for row in new_state))  # Convert back to tuple
+    return neighbors
+
+# Depth-First Search (DFS) Algorithm
+def dfs(initial_state):
+    stack = [initial_state]
+    visited = set()
+    visited.add(state_to_str(initial_state))
+    
+    while stack:
+        current_state = stack.pop()
+        print(f"Exploring state:\n{current_state}\n")
+        
+        if is_goal_state(current_state):
+            print("Goal state reached!")
+            return True
+        
+        for neighbor in generate_neighbors(current_state):
+            if state_to_str(neighbor) not in visited:
+                visited.add(state_to_str(neighbor))
+                stack.append(neighbor)
+    
+    return False
+
+# Breadth-First Search (BFS) Algorithm
+def bfs(initial_state):
+    queue = deque([initial_state])
+    visited = set()
+    visited.add(state_to_str(initial_state))
+    
+    while queue:
+        current_state = queue.popleft()
+        print(f"Exploring state:\n{current_state}\n")
+        
+        if is_goal_state(current_state):
+            print("Goal state reached!")
+            return True
+        
+        for neighbor in generate_neighbors(current_state):
+            if state_to_str(neighbor) not in visited:
+                visited.add(state_to_str(neighbor))
+                queue.append(neighbor)
+    
+    return False
+
+# Run DFS and BFS to find the goal state
+print("Running DFS...")
+dfs(initial_state)
+
+print("\nRunning BFS...")
+bfs(initial_state)
