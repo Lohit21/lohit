@@ -1,0 +1,77 @@
+import random
+
+class VacuumCleanerAgent:
+    def __init__(self, room_size=5):
+        # Room size (grid dimensions), assume 2x2 rooms (Room A and Room B)
+        self.room_size = room_size
+        self.room = [['dirty' for _ in range(room_size)] for _ in range(room_size)]  # initialize all spots as dirty
+        self.position = (0, 0)  # starting position (top-left corner)
+        self.cleaned = 0
+        self.room_a_start = (0, 0)
+        self.room_b_start = (room_size // 2, 0)
+        self.room_a_end = (room_size // 2 - 1, room_size - 1)
+        self.room_b_end = (room_size - 1, room_size - 1)
+
+    def perceive(self):
+        x, y = self.position
+        return self.room[x][y]
+
+    def clean(self):
+        x, y = self.position
+        if self.room[x][y] == 'dirty':
+            print(f"Cleaning position {self.position}")
+            self.room[x][y] = 'clean'
+            self.cleaned += 1
+        else:
+            print(f"Position {self.position} is already clean.")
+
+    def move(self):
+        # Pick a random direction (left, right, up, down) if possible
+        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]  # right, left, down, up
+        move = random.choice(directions)
+        new_position = (self.position[0] + move[0], self.position[1] + move[1])
+
+        # Ensure the new position is within bounds of the room
+        if 0 <= new_position[0] < self.room_size and 0 <= new_position[1] < self.room_size:
+            self.position = new_position
+            print(f"Moved to position {self.position}")
+        else:
+            print("Move out of bounds, staying in the current position.")
+
+    def is_in_room_a(self):
+        x, y = self.position
+        return self.room_a_start[0] <= x <= self.room_a_end[0] and self.room_a_start[1] <= y <= self.room_a_end[1]
+
+    def is_in_room_b(self):
+        x, y = self.position
+        return self.room_b_start[0] <= x <= self.room_b_end[0] and self.room_b_start[1] <= y <= self.room_b_end[1]
+
+    def move_to_room_b(self):
+        print("Moving to Room B")
+        self.position = (self.room_b_start[0], self.room_b_start[1])
+
+    def move_to_room_a(self):
+        print("Moving to Room A")
+        self.position = (self.room_a_start[0], self.room_a_start[1])
+
+    def run(self):
+        print("Vacuum Cleaner is starting its cleaning process...\n")
+        while self.cleaned < self.room_size * self.room_size:
+            if self.perceive() == 'dirty':
+                self.clean()
+            else:
+                self.move()
+
+            # Move to Room B if in Room A
+            if self.is_in_room_a():
+                self.move_to_room_b()
+
+            # Move to Room A if in Room B
+            if self.is_in_room_b():
+                self.move_to_room_a()
+
+        print("\nCleaning completed!")
+
+# Create the vacuum cleaner agent and start the cleaning process
+vacuum_agent = VacuumCleanerAgent(room_size=5)
+vacuum_agent.run()
