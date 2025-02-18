@@ -1,0 +1,72 @@
+from collections import deque
+
+# Define the state space search for the watering problem
+def bfs():
+    # Define the capacities
+    capacity_3 = 3
+    capacity_5 = 5
+    
+    # Define the goal states (4 liters in any of the containers)
+    goal = 4
+    
+    # Queue for BFS and a set to keep track of visited states
+    queue = deque([(0, 0)])  # initial state is (0, 0)
+    visited = set([(0, 0)])
+    
+    # A dictionary to store the parent states for backtracking the path
+    parent = { (0, 0): None }
+    action_taken = { (0, 0): None }
+    
+    # Define the possible actions
+    actions = [
+        # Fill the 3-liter container
+        lambda x, y: (capacity_3, y),
+        # Fill the 5-liter container
+        lambda x, y: (x, capacity_5),
+        # Empty the 3-liter container
+        lambda x, y: (0, y),
+        # Empty the 5-liter container
+        lambda x, y: (x, 0),
+        # Pour from 3-liter to 5-liter container
+        lambda x, y: (max(0, x - (capacity_5 - y)), min(capacity_5, x + y)),
+        # Pour from 5-liter to 3-liter container
+        lambda x, y: (min(capacity_3, x + y), max(0, y - (capacity_3 - x)))
+    ]
+    
+    # BFS loop
+    while queue:
+        current_state = queue.popleft()
+        x, y = current_state
+        
+        # Check if goal is achieved
+        if x == goal or y == goal:
+            # Backtrack to find the path
+            path = []
+            while current_state != (0, 0):
+                path.append(action_taken[current_state])
+                current_state = parent[current_state]
+            path.reverse()
+            return path
+        
+        # Explore the next possible states
+        for action in actions:
+            new_state = action(x, y)
+            
+            if new_state not in visited:
+                visited.add(new_state)
+                queue.append(new_state)
+                parent[new_state] = current_state
+                action_taken[new_state] = action.__name__
+    
+    return None  # Goal not reachable
+
+# Run BFS to solve the problem
+solution = bfs()
+
+# Display the solution
+if solution:
+    print("Solution found:")
+    for step in solution:
+        print(step)
+else:
+    print("No solution found.")
